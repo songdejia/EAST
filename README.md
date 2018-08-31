@@ -43,7 +43,7 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 + -- testset   ./data/test/img_###.jpg (img only)
 **Note: you can download dataset here
 + -- [ICDAR15](http://rrc.cvc.uab.es/?ch=4&com=downloads)
-+ -- [icdar13](http://rrc.cvc.uab.es/?ch=2&com=downloads)
++ -- [ICDAR13](http://rrc.cvc.uab.es/?ch=2&com=downloads)
 
 2. pretrained  
 + In config.py set resume True and set checkpoint path/to/weight/file
