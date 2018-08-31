@@ -11,7 +11,7 @@ This is a pytorch re-implementation of [EAST: An Efficient and Accurate Scene Te
 The features are summarized blow:
 
 + Only **RBOX** part is implemented.
-+ A fast Locality-Aware NMS in C++ provided by the paper's author.
++ A fast Locality-Aware NMS in C++ provided by the paper's author.(g++/gcc version 6.0 + will be ok)
 + Evalution see [here](http://rrc.cvc.uab.es/?ch=4&com=evaluation&view=method_samples&task=1&m=29855&gtv=1) for the detailed results.
 + Differences from original paper
 	+ Use ResNet-50 rather than PVANET
