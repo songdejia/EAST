@@ -230,10 +230,13 @@ def predict(model, criterion, epoch):
 
     try:
         shutil.rmtree(output_dir_txt)
+    except:
+        print('Dir {} is not exists, make it'.format(output_dir_txt))
+        
+    try:
         shutil.rmtree(output_dir_pic)
     except:
-        print('not exists, mkdir {}'.format(output_dir_pic))
-        print('not exists, mkdir {}'.format(output_dir_txt))
+        print('Dir {} is not exists, make it'.format(output_dir_pic))
 
     try:
         os.makedirs(output_dir_txt)
@@ -287,8 +290,8 @@ def predict(model, criterion, epoch):
                     p_area = polygon_area(poly)
                     if p_area > 0:
                         poly = poly[(0, 3, 2, 1), :]
-                        f.write('{},{},{},{},{},{},{},{}\r\n'.format(poly[0, 0], poly[0, 1], poly[1, 0], poly[1, 1], poly[2, 0], poly[2, 1], poly[3, 0], poly[3, 1],))
-                        cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
+                    f.write('{},{},{},{},{},{},{},{}\r\n'.format(poly[0, 0], poly[0, 1], poly[1, 0], poly[1, 1], poly[2, 0], poly[2, 1], poly[3, 0], poly[3, 1],))
+                    cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
         img_path = os.path.join(output_dir_pic, os.path.basename(im_fn))
         cv2.imwrite(img_path, im[:, :, ::-1])
 
