@@ -21,7 +21,7 @@ You could use zipfile ./submit/epoch_###_submit.zip to submit on [website](http:
 ### Performance
 ![visualization](https://github.com/songdejia/east-pytorch/blob/master/screenshots/vis02.png)
 
-![hmean]()
+![hmean](https://github.com/songdejia/east-pytorch/blob/master/screenshots/hmean.png)
 
 
 
