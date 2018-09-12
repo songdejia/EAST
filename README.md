@@ -1,7 +1,16 @@
 # EAST: An Efficient and Accurate Scene Text Detector
 ### Description:
-This work is not finished
+This work is not finished yet.
 The motivation of this version is to build a easy-training model containing train-eval-zipfile-computeF1.
++ train
++ eval
++ zip ~ 
++ hmean
++ vis:
+	+ predicted wrong -- red
+	+ predicted right -- green
+	+ not predicted   -- blue
+
 The version is ported from [argman/EAST](https://github.com/argman/EAST), from Tensorflow to Pytorch
 
 Now, the first three of the flow is done, and some bugs exists in compute F1 score script.So you can only submit it to website
