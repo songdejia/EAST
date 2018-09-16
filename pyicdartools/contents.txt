@@ -1,0 +1,2 @@
+Place the Evaluation script in ths folder.
+The file config.py has to be configured with the task parameters.

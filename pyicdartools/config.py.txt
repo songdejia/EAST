@@ -1,0 +1,76 @@
+#!/usr/bin/env python2
+#encoding: UTF-8
+
+#Name of the script used for the evalution
+evaluation_script = "Evalscript"
+
+#Extension of the GT file. gt.[extension]
+gt_ext = "zip"
+
+#Acronym for the task. It's used to cache the Images
+acronym = "T1"
+
+#Title of the Task
+title = "Task"
+
+#Custom JavaScript for the visualiztion.
+customJS = None
+
+#Custom CSS for the visualiztion.
+customCSS = None
+
+#Parameters used to show the results of a method and the method's ranking
+method_params = {
+    "recall":{
+        "long_name":"Recall",
+        "type":"double",
+        "order":"",
+        "grafic":"1",
+        "format":"perc"
+    },
+    "precision":{
+        "long_name":"Precision",
+        "type":"double",
+        "order":"",
+        "grafic":"1",
+        "format":"perc"
+    },
+    "hmean":{
+        "long_name":"Hmean",
+        "type":"double",
+        "order":"desc",
+        "grafic":"1",
+        "format":"perc"
+    }
+}
+
+#Parameters to show for each sample
+sample_params = {
+    "recall":{
+        "long_name":"Recall",
+        "type":"double",
+        "order":"",
+        "grafic":"1",
+        "format":"perc"
+    },
+    "precision":{
+        "long_name":"Precision",
+        "type":"double",
+        "order":"",
+        "grafic":"1",
+        "format":"perc"
+    },
+    "hmean":{
+        "long_name":"Hmean",
+        "type":"double",
+        "order":"desc",
+        "grafic":"1",
+        "format":"perc"
+    }
+}
+
+#Parameters to ask for for each submition
+submit_params = {}
+
+#Regular expression to get the Sample ID from the image name. ID must be the first capturing group.
+image_name_to_id_str = 'img_([0-9]+).(jpg|gif|png)'
