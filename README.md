@@ -8,12 +8,9 @@ At the same time, we can see evaluation info about every sample easily.
 + 2.predict 
 + 3.Zip
 + 4.compute Hmean(if Hmean is higher than before, update best_weight)
-+ 5.vis:
-	predicted wrong -- red
-	predicted right -- green
-	not predicted   -- blue
++ 5.visualization
 + 6.multi-scale test (update soon)
-    multi-scale vis. (vis with score, scale)
+    multi-scale vis. (vis with score, scales)
 
 ### Thanks
 The version is ported from [argman/EAST](https://github.com/argman/EAST), from Tensorflow to Pytorch
