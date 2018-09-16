@@ -1,6 +1,5 @@
 # EAST: An Efficient and Accurate Scene Text Detector
 ### Description:
-This work is not finished yet.
 The motivation of this version is to build a easy-training model. 
 This version can automatically update best_model by comparing current hmean and the former.
 At the same time, we can see evaluation info about every sample easily.
