@@ -57,20 +57,24 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 1. Pretrained model is not provided temporarily. Web site is updating now, please continue to pay attention 
 
 ### Prepare dataset/pretrain weight
-1. dataset 
-+ -- train  ./dataset/train/img_###.jpg 
-	    ./dataset/train/img_###.txt (you need to change name)
+1. dataset(you need to prepare for dataset for train and test)
+suggestions: you could do a soft-link to root_to_this_program/dataset/train/img/*.jpg
++ -- train  ./dataset/train/img/img_###.jpg 
+	    ./dataset/train/gt/img_###.txt (you need to change name)
+
 + -- test   ./data/test/img_###.jpg (img only)
++ -- gt.zip ./result/gt.zip(ICDAR15 gt.zip is avaliable on[website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1)
+
 **Note: you can download dataset here
 + -- [ICDAR15](http://rrc.cvc.uab.es/?ch=4&com=downloads)
 + -- [ICDAR13](http://rrc.cvc.uab.es/?ch=2&com=downloads)
 
 2. pretrained  
 + In config.py set resume True and set checkpoint path/to/weight/file
++ I will provide pretrianed weight soon
 
 ### Train
-If you want to train the model, you should provide the dataset path in config.py, in the dataset path, a separate gt text file should be provided for each image
-and run
+If you want to train the model, you should provide the dataset path in config.py and run
 
 ```
 sh run.py
