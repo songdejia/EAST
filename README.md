@@ -22,9 +22,7 @@ The version is ported from [argman/EAST](https://github.com/argman/EAST), from T
 If you have no confidence of the result of our program, you could use submit.zip to submit on [website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1),then you can see result of every image.
 
 ### Performance
-+ right -- green
-+ wrong -- red
-+ miss. -- blue
++ right -- green || wrong -- red || miss -- blue
 ![visualization](https://github.com/songdejia/east-pytorch/blob/master/screenshots/vis02.png)
 
 
