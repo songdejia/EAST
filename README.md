@@ -1,29 +1,31 @@
 # EAST: An Efficient and Accurate Scene Text Detector
 ### Description:
 This work is not finished yet.
-The motivation of this version is to build a easy-training model containing train-eval-zipfile-computeF1.
-+ train
-+ eval
-+ zipfile
-+ hmean
-+ vis:
+The motivation of this version is to build a easy-training model. 
+This version can automatically update best_model by comparing current hmean and the former.
+At the same time, we can see evaluation info about every sample easily.
+
++ 1.train
++ 2.predict 
++ 3.Zip
++ 4.compute Hmean(if Hmean is higher than before, update best_weight)
++ 5.vis:
 	predicted wrong -- red
 	predicted right -- green
 	not predicted   -- blue
++ 6.multi-scale test (update soon)
+    multi-scale vis. (vis with score, scale)
 
+### Thanks
 The version is ported from [argman/EAST](https://github.com/argman/EAST), from Tensorflow to Pytorch
 
-Now, the first three of the flow is done, and some bugs exists in compute F1 score script.So you can only submit it to website
-
-You could use zipfile ./submit/epoch_###_submit.zip to submit on [website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1) 
-
+### Check On Website
+If you have no confidence of the result of our program, you could use submit.zip to submit on [website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1),then you can see result of every image.
 
 ### Performance
 ![visualization](https://github.com/songdejia/east-pytorch/blob/master/screenshots/vis02.png)
 
 ![hmean](https://github.com/songdejia/east-pytorch/blob/master/screenshots/hmean.png)
-
-
 
 ### Introduction
 This is a pytorch re-implementation of [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155v2).
@@ -57,9 +59,9 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 
 ### Prepare dataset/pretrain weight
 1. dataset 
-+ -- trainset  ./data/train/img_###.jpg 
-	       ./data/test/img_###.txt 
-+ -- testset   ./data/test/img_###.jpg (img only)
++ -- train  ./dataset/train/img_###.jpg 
+	    ./dataset/train/img_###.txt (you need to change name)
++ -- test   ./data/test/img_###.jpg (img only)
 **Note: you can download dataset here
 + -- [ICDAR15](http://rrc.cvc.uab.es/?ch=4&com=downloads)
 + -- [ICDAR13](http://rrc.cvc.uab.es/?ch=2&com=downloads)
