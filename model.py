@@ -155,9 +155,7 @@ class ResNet(nn.Module):
         return x, f
 
 
-
-
-def resnet50(pretrained=False, **kwargs):
+def resnet50(pretrained=True, **kwargs):
     """Constructs a ResNet-50 model.
 
     Args:
@@ -170,6 +168,7 @@ def resnet50(pretrained=False, **kwargs):
         model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
     return model
 
+"""
 def mean_image_subtraction(images, means=[123.68, 116.78, 103.94]):
     '''
     image normalization
@@ -184,6 +183,7 @@ def mean_image_subtraction(images, means=[123.68, 116.78, 103.94]):
         images.data[:,i,:,:] -= means[i]
 
     return images
+"""
 
 class East(nn.Module):
     def __init__(self):
@@ -226,8 +226,9 @@ class East(nn.Module):
         self.unpool1 = nn.Upsample(scale_factor=2, mode='bilinear')
         self.unpool2 = nn.Upsample(scale_factor=2, mode='bilinear')
         self.unpool3 = nn.Upsample(scale_factor=2, mode='bilinear')
+    
     def forward(self,images):
-        images = mean_image_subtraction(images)
+        #images = mean_image_subtraction(images)
         _, f = self.resnet(images)
         h = f[3]  # bs 2048 w/32 h/32
         g = (self.unpool1(h)) #bs 2048 w/16 h/16
