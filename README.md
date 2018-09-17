@@ -62,7 +62,7 @@ suggestions: you could do a soft-link to root_to_this_program/dataset/train/img/
 + -- train  ./dataset/train/img/img_###.jpg 
 	    ./dataset/train/gt/img_###.txt (you need to change name)
 + -- test   ./data/test/img_###.jpg (img only)
-+ -- gt.zip ./result/gt.zip(ICDAR15 gt.zip is avaliable on[website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1)
++ -- gt.zip ./result/gt.zip(ICDAR15 gt.zip is avaliable on [website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1)
 
 ** Note: you can download dataset here
 + -- [ICDAR15](http://rrc.cvc.uab.es/?ch=4&com=downloads)
@@ -105,6 +105,8 @@ See the examples in training_samples/**
 ### Test
 By default, we set train-eval process into integer.
 If you want to use eval independently, you can do it by yourself. Any question can contact me.
+![test](https://github.com/songdejia/EAST-pytorch-AutoTrain-Eval/blob/master/screenshots/test.jpg)
+
 
 ### Examples
 Here are some test examples on icdar2015, enjoy the beautiful text boxes!
