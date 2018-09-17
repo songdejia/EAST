@@ -3,7 +3,7 @@ import time
 import math
 import os
 import numpy as np
-
+from PIL import Image
 import locality_aware_nms as nms_locality
 import lanms
 import shutil
@@ -12,7 +12,8 @@ import model
 from data_utils import restore_rectangle, polygon_area
 from torch.autograd import Variable
 import config as cfg
-
+import sys
+from torchvision import transforms
 import model
 test_data_path = cfg.test_img_path
 
@@ -62,6 +63,7 @@ def get_images_for_test():
                 if filename.endswith(ext):
                     files.append(os.path.join(parent, filename))
                     break
+    
     # print('Find {} images'.format(len(files)))
     return files
 
@@ -78,15 +80,19 @@ def resize_image(im, max_side_len=2400):
     resize_h = h
 
     # limit the max side
+    """
     if max(resize_h, resize_w) > max_side_len:
         ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
     else:
         ratio = 1.
+
     resize_h = int(resize_h * ratio)
     resize_w = int(resize_w * ratio)
+    """
 
-    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
-    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
+    #resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
+    #resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
+    resize_h, resize_w = 512, 512
     im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
     ratio_h = resize_h / float(h)
@@ -218,15 +224,32 @@ def save_box(box_List,image,img_path):
         box_List[i]=box
     return box_List
 
+def transform_for_test():
+    """
+    CV2 => PI => tensor
+    """
+    #image = Image.fromarray(np.uint8(img))
+
+    transform_list = []
+    
+    transform_list.append(transforms.ToTensor())
+    
+    transform_list.append(transforms.Normalize(mean=(0.5,0.5,0.5),std=(0.5,0.5,0.5)))
+
+    transform = transforms.Compose(transform_list)
+
+    return transform
+
 
 def predict(model, criterion, epoch):
     # prepare ooutput directory
+    print('EAST <==> TEST <==> Create Res_file and Img_with_box <==> Begin')
     result_root = os.path.abspath(cfg.result)
     if not os.path.exists(result_root):
-        os.makedirs(result_root)
+        os.mkdir(result_root)
 
     output_dir_txt = os.path.join(result_root, 'epoch_'+str(epoch)+'_gt')
-    output_dir_pic = os.path.join(result_root, 'epoch_'+str(epoch)+'_imgwithbox')
+    output_dir_pic = os.path.join(result_root, 'epoch_'+str(epoch)+'_img_with_box')
 
     try:
         shutil.rmtree(output_dir_txt)
@@ -239,31 +262,45 @@ def predict(model, criterion, epoch):
         print('Dir {} is not exists, make it'.format(output_dir_pic))
 
     try:
-        os.makedirs(output_dir_txt)
-        os.makedirs(output_dir_pic)
+        os.mkdir(output_dir_txt)
+        os.mkdir(output_dir_pic)
+
     except OSError as e:
         if e.errno != 17:
             raise
 
-    print('Epoch {} In evalution, result directory is done'.format(epoch))
+    print('EAST <==> TEST <==> Create Res_file and Img_with_box Directory ')
 
     model = model.eval()
     im_fn_list = get_images_for_test()
     start = time.time()
 
-    for idx, im_fn in enumerate(im_fn_list):
+    for idx, im_fn in enumerate(im_fn_list):    
+        print('EAST <==> TEST <==> idx:{} <==> Begin'.format(idx))
         im = cv2.imread(im_fn)[:, :, ::-1]
+
+
+        transform = transform_for_test()
+
+
         start_time = time.time()
         im_resized, (ratio_h, ratio_w) = resize_image(im)
         im_resized = im_resized.astype(np.float32)
-        im_resized = torch.from_numpy(im_resized).cuda()
+        image = Image.fromarray(np.uint8(im_resized))
+
+        im_resized = transform(image) 
+
+        im_resized = im_resized.cuda()
         im_resized = im_resized.unsqueeze(0)
-        im_resized = im_resized.permute(0, 3, 1, 2)
+        #im_resized = im_resized.permute(0, 3, 1, 2)
 
         timer = {'net': 0, 'restore': 0, 'nms': 0}
         start = time.time()
+        
         score, geometry = model(im_resized)
+
         timer['net'] = time.time() - start
+        print('EAST <==> TEST <==> idx:{} <==> model  :{:.2f}ms'.format(idx, timer['net']*1000))
 
         score = score.permute(0, 2, 3, 1)
         geometry = geometry.permute(0, 2, 3, 1)
@@ -271,32 +308,39 @@ def predict(model, criterion, epoch):
         geometry = geometry.data.cpu().numpy()
 
         boxes, timer = detect(score_map=score, geo_map=geometry, timer=timer)
-        print('imgpath{} : net {:.0f}ms, restore {:.0f}ms, nms {:.0f}ms'.format(im_fn, timer['net']*1000, timer['restore']*1000, timer['nms']*1000))
+        print('EAST <==> TEST <==> idx:{} <==> restore:{:.2f}ms'.format(idx, timer['restore']*1000))
+        print('EAST <==> TEST <==> idx:{} <==> nms    :{:.2f}ms'.format(idx, timer['nms']*1000))
 
+
+        print('EAST <==> TEST <==> Record and Save <==> Begin')
         if boxes is not None:
             boxes = boxes[:, :8].reshape((-1, 4, 2))
             boxes[:, :, 0] /= ratio_w
             boxes[:, :, 1] /= ratio_h
 
         if boxes is not None:
-            res_file = os.path.join(output_dir_txt, 'res_{}.txt'.format(os.path.basename(im_fn).split('.')[0]))
+            res_file = os.path.join(output_dir_txt, 'res_img_{}.txt'.format(os.path.basename(im_fn).split('_')[-1].strip('.jpg')))
             with open(res_file, 'w') as f:
                 for box in boxes:
                     box = sort_poly(box.astype(np.int32))
+
                     if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3] - box[0]) < 5:
                         #print('wrong direction')
                         continue
-                    poly = np.array( [[box[0, 0], box[0, 1]], [box[1, 0], box[1, 1]], [box[2, 0], box[2, 1]], [box[3, 0], box[3, 1]] ])
+                    
+                    if box[0, 0] < 0 or box[0, 1] < 0 or box[1,0] < 0 or box[1,1] < 0 or box[2,0]<0 or box[2,1]<0 or box[3,0] < 0 or box[3,1]<0:
+                        continue
+                        
+                    poly = np.array([[box[0, 0], box[0, 1]], [box[1, 0], box[1, 1]], [box[2, 0], box[2, 1]], [box[3, 0], box[3, 1]]])
                     p_area = polygon_area(poly)
                     if p_area > 0:
                         poly = poly[(0, 3, 2, 1), :]
                     f.write('{},{},{},{},{},{},{},{}\r\n'.format(poly[0, 0], poly[0, 1], poly[1, 0], poly[1, 1], poly[2, 0], poly[2, 1], poly[3, 0], poly[3, 1],))
                     cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
-        img_path = os.path.join(output_dir_pic, os.path.basename(im_fn))
+        img_path = os.path.join(output_dir_pic, '{}'.format(epoch), os.path.basename(im_fn))
         cv2.imwrite(img_path, im[:, :, ::-1])
 
-    #during = time.time() - start
-    #print('average :{:.6f}'.format(during / len(im_fn_list)))
+        print('EAST <==> TEST <==> Record and Save <==> Done')
     return  output_dir_txt
 
 if __name__ == "__main__":
