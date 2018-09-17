@@ -79,7 +79,7 @@ watch -n 0.1 nvidia-smi
 ```
 then, you will see 2,3 is avaliable, modify config.py
 gpu_ids = [0,1], gpu = 2, and modify run.sh - CUDA_VISIBLE_DEVICES=2,3
-![gpu]()
+![gpu](https://github.com/songdejia/EAST-pytorch-AutoTrain-Eval/blob/master/screenshots/gpu.png)
 
 
 you can use following to check aviliable cpu, this is for nms
@@ -87,7 +87,7 @@ you can use following to check aviliable cpu, this is for nms
 htop
 ```
 then, you will see
-![cpu]()
+![cpu](https://github.com/songdejia/EAST-pytorch-AutoTrain-Eval/blob/master/screenshots/cpu.jpg)
 
 ### Train
 If you want to train the model, you should provide the dataset path in config.py and run
