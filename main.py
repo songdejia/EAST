@@ -18,6 +18,7 @@ from utils.save import *
 from utils.myzip import *
 import torch.backends.cudnn as cudnn
 from eval import predict
+from hmean import compute_hmean
 import zipfile
 import glob
 import warnings
@@ -77,6 +78,11 @@ def main():
     
 
     # test datalodaer
+    """
+    for i in range(100000):
+        for j, (a,b,c,d) in enumerate(train_loader):
+            print(i, j,'/',len(train_loader))
+    """
 
     # Model
     print('EAST <==> Prepare <==> Network <==> Begin')
