@@ -57,21 +57,37 @@ Please cite his [paper](https://arxiv.org/abs/1704.03155v2) if you find this use
 1. Pretrained model is not provided temporarily. Web site is updating now, please continue to pay attention 
 
 ### Prepare dataset/pretrain weight
-1. dataset(you need to prepare for dataset for train and test)
+[1]. dataset(you need to prepare for dataset for train and test)
 suggestions: you could do a soft-link to root_to_this_program/dataset/train/img/*.jpg
 + -- train  ./dataset/train/img/img_###.jpg 
 	    ./dataset/train/gt/img_###.txt (you need to change name)
-
 + -- test   ./data/test/img_###.jpg (img only)
 + -- gt.zip ./result/gt.zip(ICDAR15 gt.zip is avaliable on[website](http://rrc.cvc.uab.es/?ch=2&com=mymethods&task=1)
 
-**Note: you can download dataset here
+** Note: you can download dataset here
 + -- [ICDAR15](http://rrc.cvc.uab.es/?ch=4&com=downloads)
 + -- [ICDAR13](http://rrc.cvc.uab.es/?ch=2&com=downloads)
 
-2. pretrained  
+[2]. pretrained  
 + In config.py set resume True and set checkpoint path/to/weight/file
 + I will provide pretrianed weight soon
+
+[3]. check GPUs and CPUs 
+you can use following to check aviliable gpu, this is for train
+```
+watch -n 0.1 nvidia-smi
+```
+then, you will see 2,3 is avaliable, modify config.py
+gpu_ids = [0,1], gpu = 2, and modify run.sh - CUDA_VISIBLE_DEVICES=2,3
+![gpu]()
+
+
+you can use following to check aviliable cpu, this is for nms
+```
+htop
+```
+then, you will see
+![cpu]()
 
 ### Train
 If you want to train the model, you should provide the dataset path in config.py and run
@@ -79,11 +95,11 @@ If you want to train the model, you should provide the dataset path in config.py
 ```
 sh run.py
 ```
-**Note: you should modify run.sh to specify your gpu id
+** Note: you should modify run.sh to specify your gpu id
 
 If you have more than one gpu, you can pass gpu ids to gpu_list(like gpu_list=0,1,2,3) in config.py
 
-**Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
+** Note: you should change the gt text file of icdar2015's filename to img_\*.txt instead of gt_img_\*.txt(or you can change the code in icdar.py), and some extra characters should be removed from the file.
 See the examples in training_samples/**
 
 ### Test
