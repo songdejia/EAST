@@ -20,7 +20,9 @@ If you have no confidence of the result of our program, you could use submit.zip
 
 ### Performance
 + right -- green || wrong -- red || miss -- blue
+![visualization](https://github.com/songdejia/east-pytorch/blob/master/screenshots/vis01.png)
 ![visualization](https://github.com/songdejia/east-pytorch/blob/master/screenshots/vis02.png)
+
 
 
 + recall/precision/hmean for every test image
