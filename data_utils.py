@@ -17,6 +17,7 @@ import warnings
 
 
 
+
 def get_images(root):
     '''
     get images's path and name
@@ -248,7 +249,7 @@ def crop_area(im, polys, tags, crop_background=False, max_tries=5000, vis = Fals
                 return im, polys, tags
             else:
                 continue
-    return im, [], []
+    return im, polys, tags
 
 
 
@@ -411,9 +412,10 @@ def shrink_poly(poly, r):
 
 def point_dist_to_line(p1, p2, p3):
     # compute the distance from p3 to p1-p2
+    distance = 0
     try:
         eps = 1e-5
-        distance = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)+eps
+        distance = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) /(np.linalg.norm(p2 - p1)+eps)
     
     except:
         print('point dist to line raise Exception')
@@ -788,6 +790,7 @@ def image_label(txt_root,
     geo    [128, 128, 5]
     mask   [128, 128, 1]
     '''
+
     try:
         im_fn = image_list[index]
         txt_fn = txt_list[index]
@@ -809,6 +812,34 @@ def image_label(txt_root,
 
         im = cv2.resize(im, dsize=None, fx=rd_scale, fy=rd_scale)
         text_polys *= rd_scale
+        ###########################for exception to return #############################
+        h, w, _ = im.shape
+
+        # pad the image to the training input size or the longer side of image
+        new_h, new_w, _ = im.shape
+        max_h_w_i = np.max([new_h, new_w, input_size])
+        im_padded = np.zeros((max_h_w_i, max_h_w_i, 3), dtype=np.uint8)
+        im_padded[:new_h, :new_w, :] = im.copy()
+        im = im_padded
+        # resize the image to input size
+        new_h, new_w, _ = im.shape
+        resize_h = input_size
+        resize_w = input_size
+        im = cv2.resize(im, dsize=(resize_w, resize_h))
+        resize_ratio_3_x = resize_w/float(new_w)
+        resize_ratio_3_y = resize_h/float(new_h)
+        #print(text_polys.type.name)
+
+        for i in range(len(text_polys)):
+            for j in range(4):
+                text_polys[i][j][0] *= resize_ratio_3_x
+                text_polys[i][j][1] *= resize_ratio_3_y
+
+        #text_polys[:, :, 0] *= resize_ratio_3_x
+        #ext_polys[:, :, 1] *= resize_ratio_3_y
+        new_h, new_w, _ = im.shape
+        ########################################################################
+
         # print rd_scale
         # random crop a area from image
         #if np.random.rand() < background_ratio:
@@ -877,10 +908,9 @@ def image_label(txt_root,
             #print('done4')
     
     except Exception as e:
-        print(e)
-        sys.exit('Raise Exception on crop augumentation')
+        print('Exception continue')
+        return None, None,None,None
 
-    
     images = im[:, :, ::-1].astype(np.float32)
     score_maps = score_map[::4, ::4, np.newaxis].astype(np.float32)
     geo_maps = geo_map[::4, ::4, :].astype(np.float32)
@@ -950,7 +980,10 @@ class custom_dset(data.Dataset):
 
 
     def __getitem__(self, index):
-        img, score_map, geo_map, training_mask = image_label(self.txt_root,
+            
+        status = True
+        while status:
+            img, score_map, geo_map, training_mask = image_label(self.txt_root,
             
                 self.img_path_list, self.img_name_list,
             
@@ -959,13 +992,20 @@ class custom_dset(data.Dataset):
                 index, input_size = 512,
             
                 random_scale = np.array([0.5, 1.0, 2.0, 3.0]), background_ratio = 3./8)
-        #cv2.imshow('im', img)
-        #path = '/tmp/djsong/{}'.format(self.img_name_list[index])
-        #cv2.imwrite(path, img)
-        #cv2.waitKey(0)
-        img = transform_for_train(img)
+        
+            if not img is None:
 
-        return img, score_map, geo_map, training_mask
+                img = transform_for_train(img)
+
+                status = False
+
+                return img, score_map, geo_map, training_mask
+
+            else:
+
+                index = np.random.random_integers(0, self.__len__())
+                print('Exception in getitem, and choose another index:{}'.format(index))
+
 
 
         
