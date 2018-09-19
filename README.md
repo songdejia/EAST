@@ -6,9 +6,9 @@ At the same time, we can see evaluation info about every sample easily.
 
 + 1.train
 + 2.predict 
-+ 3.Zip
-+ 4.compute Hmean(if Hmean is higher than before, update best_weight)
-+ 5.visualization
++ 3.compress
++ 4.compute Hmean(if Hmean is higher than before, update best_weight.pkl)
++ 5.visualization(blue, green, red)
 + 6.multi-scale test (update soon)
     multi-scale vis. (vis with score, scales)
 
