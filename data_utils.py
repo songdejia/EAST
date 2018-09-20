@@ -14,6 +14,7 @@ import matplotlib.patches as Patches
 from shapely.geometry import Polygon
 from PIL import Image
 import warnings
+from geo_map_cython_lib import gen_geo_map
 
 
 
@@ -756,6 +757,7 @@ def generate_rbox(im_size, polys, tags):
         #print('parallel {} rectangle {}'.format(parallelogram, rectange))
         p0_rect, p1_rect, p2_rect, p3_rect = rectange
         # this is one area of many
+        """
         for y, x in xy_in_poly:
             point = np.array([x, y], dtype=np.float32)
             # top
@@ -768,6 +770,9 @@ def generate_rbox(im_size, polys, tags):
             geo_map[y, x, 3] = point_dist_to_line(p3_rect, p0_rect, point)
             # angle
             geo_map[y, x, 4] = rotate_angle
+        """
+        gen_geo_map.gen_geo_map(geo_map, xy_in_poly, rectange, rotate_angle)
+
     ###sum up
     # score_map , in shrinked poly is 1
     # geo_map, corresponding to score map
@@ -980,7 +985,7 @@ class custom_dset(data.Dataset):
 
 
     def __getitem__(self, index):
-            
+        #transform = transform_for_train()
         status = True
         while status:
             img, score_map, geo_map, training_mask = image_label(self.txt_root,
@@ -993,11 +998,15 @@ class custom_dset(data.Dataset):
             
                 random_scale = np.array([0.5, 1.0, 2.0, 3.0]), background_ratio = 3./8)
         
-            if not img is None:
+            if not img is None:#512,512,3 ndarray should transform to 3,512,512
 
-                img = transform_for_train(img)
 
                 status = False
+                
+                #img = transform_for_train(img)
+                img = img.transpose(2, 0, 1)
+                #print(img.shape)
+                #print(type(img))
 
                 return img, score_map, geo_map, training_mask
 
@@ -1028,8 +1037,8 @@ def collate_fn(batch):
     training_masks = []
     for i in range(bs):
         if img[i] is not None:
-            #a = torch.from_numpy(img[i])
-            a = img[i]
+            a = torch.from_numpy(img[i])
+            #a = img[i]
             images.append(a)
            
             b = torch.from_numpy(score_map[i])
