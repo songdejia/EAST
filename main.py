@@ -32,7 +32,8 @@ def train(train_loader, model, criterion, scheduler, optimizer, epoch):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     end = time.time()
-
+    model.train()
+    
     for i, (img, score_map, geo_map, training_mask) in enumerate(train_loader):
         data_time.update(time.time() - end)
 

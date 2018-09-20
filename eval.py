@@ -90,9 +90,9 @@ def resize_image(im, max_side_len=2400):
     resize_w = int(resize_w * ratio)
     """
 
-    #resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
-    #resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
-    resize_h, resize_w = 512, 512
+    resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
+    resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
+    #resize_h, resize_w = 512, 512
     im = cv2.resize(im, (int(resize_w), int(resize_h)))
 
     ratio_h = resize_h / float(h)
@@ -280,16 +280,17 @@ def predict(model, criterion, epoch):
         im = cv2.imread(im_fn)[:, :, ::-1]
 
 
-        transform = transform_for_test()
+        #transform = transform_for_test()
 
 
         start_time = time.time()
         im_resized, (ratio_h, ratio_w) = resize_image(im)
         im_resized = im_resized.astype(np.float32)
-        image = Image.fromarray(np.uint8(im_resized))
+        #image = Image.fromarray(np.uint8(im_resized))
 
-        im_resized = transform(image) 
-
+        #im_resized = transform(image) 
+        im_resized = im_resized.transpose(2, 0, 1)
+        im_resized = torch.from_numpy(im_resized)
         im_resized = im_resized.cuda()
         im_resized = im_resized.unsqueeze(0)
         #im_resized = im_resized.permute(0, 3, 1, 2)
@@ -312,7 +313,7 @@ def predict(model, criterion, epoch):
         print('EAST <==> TEST <==> idx:{} <==> nms    :{:.2f}ms'.format(idx, timer['nms']*1000))
 
 
-        print('EAST <==> TEST <==> Record and Save <==> Begin')
+        print('EAST <==> TEST <==> Record and Save <==> id:{} <==> Begin'.format(idx))
         if boxes is not None:
             boxes = boxes[:, :8].reshape((-1, 4, 2))
             boxes[:, :, 0] /= ratio_w
@@ -332,15 +333,20 @@ def predict(model, criterion, epoch):
                         continue
                         
                     poly = np.array([[box[0, 0], box[0, 1]], [box[1, 0], box[1, 1]], [box[2, 0], box[2, 1]], [box[3, 0], box[3, 1]]])
+                    
                     p_area = polygon_area(poly)
                     if p_area > 0:
                         poly = poly[(0, 3, 2, 1), :]
+
                     f.write('{},{},{},{},{},{},{},{}\r\n'.format(poly[0, 0], poly[0, 1], poly[1, 0], poly[1, 1], poly[2, 0], poly[2, 1], poly[3, 0], poly[3, 1],))
                     cv2.polylines(im[:, :, ::-1], [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 0), thickness=1)
-        img_path = os.path.join(output_dir_pic, '{}'.format(epoch), os.path.basename(im_fn))
-        cv2.imwrite(img_path, im[:, :, ::-1])
+        
+        save_img_path = os.path.join(output_dir_pic, os.path.basename(im_fn))
+        cv2.imwrite(save_img_path, im[:, :, ::-1])
+        print('EAST <==> TEST <==> Save txt   at:{} <==> Done'.format(res_file))
+        print('EAST <==> TEST <==> Save image at:{} <==> Done'.format(save_img_path))
 
-        print('EAST <==> TEST <==> Record and Save <==> Done')
+        print('EAST <==> TEST <==> Record and Save <==> ids:{} <==> Done'.format(idx))
     return  output_dir_txt
 
 if __name__ == "__main__":
