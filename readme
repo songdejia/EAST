@@ -1,0 +1,6 @@
+gt.zip:  should compress in the gt folder, parallel with txt.   change name to :img_[0-9].txt or else in TL_iou.py
+eval.py:  set max_side_len to to avoid out of memory in gpu.   in def resize_image(im, max_side_len=96)
+
+
+our data:
+gt: eight points in clockwise

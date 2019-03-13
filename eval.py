@@ -67,7 +67,7 @@ def get_images_for_test():
     # print('Find {} images'.format(len(files)))
     return files
 
-def resize_image(im, max_side_len=2400):
+def resize_image(im, max_side_len=96):
     '''
     resize image to a size multiple of 32 which is required by the network
     :param im: the resized image
@@ -80,7 +80,7 @@ def resize_image(im, max_side_len=2400):
     resize_h = h
 
     # limit the max side
-    """
+    #"""
     if max(resize_h, resize_w) > max_side_len:
         ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
     else:
@@ -88,7 +88,7 @@ def resize_image(im, max_side_len=2400):
 
     resize_h = int(resize_h * ratio)
     resize_w = int(resize_w * ratio)
-    """
+    #"""
 
     resize_h = resize_h if resize_h % 32 == 0 else (resize_h // 32 - 1) * 32
     resize_w = resize_w if resize_w % 32 == 0 else (resize_w // 32 - 1) * 32
@@ -288,7 +288,7 @@ def predict(model, criterion, epoch):
         im_resized = im_resized.astype(np.float32)
         #image = Image.fromarray(np.uint8(im_resized))
 
-        #im_resized = transform(image) 
+        #im_resized = transform(image)
         im_resized = im_resized.transpose(2, 0, 1)
         im_resized = torch.from_numpy(im_resized)
         im_resized = im_resized.cuda()

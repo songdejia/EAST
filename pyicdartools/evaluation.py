@@ -26,13 +26,13 @@ import operator
 try:
     from bottle import route, run, request, static_file, url, template, TEMPLATE_PATH, HTTPResponse, redirect
 except ImportError:
-    print """Required module not found: Bottle. Installation: pip install --user bottle"""
+    print ("""Required module not found: Bottle. Installation: pip install --user bottle""")
     sys.exit(-1)
 
 try:
     from PIL import Image
 except ImportError:
-    print """Required module not found: Pillow. Installation: pip install --user Pillow"""
+    print ("""Required module not found: Pillow. Installation: pip install --user Pillow""")
     sys.exit(-1)
 
 p = {
@@ -138,7 +138,7 @@ def packing(save_dir, pack_dir, pack_name):
     os.system('zip -r -j ' + os.path.join(pack_dir, pack_name + '.zip') + ' ' + save_dir + '/*')
 
 def test_single(dt_dir, score_det, overlap, zip_dir, pack_dir, result_list, vis_path=''):
-    print score_det, overlap
+    print (score_det, overlap)
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
     nms_dir = os.path.join(zip_dir, str(score_det) + '_over' + str(overlap))
@@ -146,7 +146,7 @@ def test_single(dt_dir, score_det, overlap, zip_dir, pack_dir, result_list, vis_
         os.mkdir(nms_dir)
     for i in range(1, 501):
         img = 'img_' + str(i) + '.jpg'
-        print img
+        print(img)
         image = cv2.imread(os.path.join(img_dir, img))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         gt_img = 'gt_img_' + str(i) + '.txt'
