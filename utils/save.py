@@ -43,7 +43,7 @@ def save_loss_info(losses, epoch, current_batch, loader, path='./log.txt'):
     if not os.path.isfile(log_loss_path):
         os.mknod(log_loss_path)
 
-    with open(path, 'a') as f:
+    with open(log_loss_path, 'a') as f:
         line = 'Epoch: [{0}][{1}/{2}]\t Loss {loss.val:.4f} ({loss.avg:.4f})\n'.format(epoch,current_batch, len(loader), loss = losses)
         f.write(line)
 
