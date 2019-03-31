@@ -242,7 +242,7 @@ def crop_area(im, polys, tags, crop_background=False, max_tries=5000, vis = Fals
                 polys = np.array(polys)
                 polys[:, :, 0] -= xmin #ndarray
                 polys[:, :, 1] -= ymin
-                polys = polys.astype(np.int32)
+                polys = polys.astype(np.float32)  #bug1
                 polys = polys.tolist()
 
                 tags  = tags.tolist()

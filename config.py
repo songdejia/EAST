@@ -1,5 +1,5 @@
 #data
-dataroot = './data'  #./data/train/img      ./data/train/gt
+dataroot = './dataset'  #./dataroot/train/img      ./dataroot/train/gt
 test_img_path = './data/test/img'
 result = './result'
 
@@ -10,13 +10,13 @@ init_type = 'xavier'
 
 resume = False
 checkpoint = ''# should be file
-train_batch_size_per_gpu = 1
-num_workers = 1
+train_batch_size_per_gpu = 14
+num_workers = 0  #bug2
 
 print_freq = 1
 eval_iteration = 500
 save_iteration = 500
-max_epochs = 100000
+max_epochs = 1000
 
 
 

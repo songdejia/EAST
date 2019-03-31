@@ -1,4 +1,5 @@
-CXXFLAGS = -I include  -std=c++11 -O3 -std=c++11 -O3 -I/data/jiangmiaotong/anaconda3/envs/tf/include/python3.6m -I/data/jiangmiaotong/anaconda3/envs/tf/include/python3.6m  -Wno-unused-result -Wsign-compare -march=nocona -mtune=generic -ftree-vectorize -fPIC -fstack-protector-strong -O3 -pipe  -fdebug-prefix-map==/usr/local/src/conda/- -fdebug-prefix-map==/usr/local/src/conda-prefix -fuse-linker-plugin -ffat-lto-objects -flto-partition=none -flto -DNDEBUG -fwrapv -O3 -Wall -L/data/jiangmiaotong/anaconda3/envs/tf/lib/python3.6/config-3.6m-x86_64-linux-gnu -L/data/jiangmiaotong/anaconda3/envs/tf/lib -lpython3.6m -lpthread -ldl  -lutil -lrt -lm  -Xlinker -export-dynamic adaptor.cpp include/clipper/clipper.cpp --shared -fPIC
+CXXFLAGS = -I include  -std=c++11 -O3 -std=c++11 -O3 -I/usr/include/python3.7m -I/usr/include/python3.7m  -Wno-unused-result -Wsign-compare -march=x86-64 -mtune=generic -O3 -pipe -fstack-protector-strong -fno-plt -flto=4 -fuse-linker-plugin -ffat-lto-objects -flto-partition=none -DNDEBUG -g -fwrapv -O3 -Wall
+
 LDFLAGS = $(shell python3-config --ldflags)
 
 DEPS = lanms.h $(shell find include -xtype f)
