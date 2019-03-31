@@ -67,9 +67,9 @@ def get_images_for_test():
     # print('Find {} images'.format(len(files)))
     return files
 
-def resize_image(im, max_side_len=96):
+def resize_image(im, max_side_len=512):
     '''
-    resize image to a size multiple of 32 which is required by the network
+    resize image to a size multiple of 32 which is required zby the network
     :param im: the resized image
     :param max_side_len: limit of max image size to avoid out of memory in gpu
     :return: the resized image and the resize ratio
