@@ -67,7 +67,7 @@ def main():
     warnings.simplefilter('ignore', np.RankWarning)
     # Prepare for dataset
     print('EAST <==> Prepare <==> DataLoader <==> Begin')
-    train_root_path = os.path.abspath(os.path.join(dataroot, 'train'))
+    train_root_path = os.path.abspath(os.path.join(cfg.dataroot, 'train'))
     train_img = os.path.join(train_root_path, 'img')
     train_gt  = os.path.join(train_root_path, 'gt')
 
