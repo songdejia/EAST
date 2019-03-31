@@ -1,4 +1,5 @@
 import os
+import copy
 import math
 import random
 import torch
@@ -62,17 +63,30 @@ def load_annoataion(p):
     if not os.path.exists(p):
         return np.array(text_polys, dtype=np.float32)
     with open(p, 'r') as f:
-        reader = csv.reader(f)
-        for line in reader: 
-            label = line[-1]# strip BOM. \ufeff for python3,  \xef\xbb\bf for python2 
-            line = [i.strip('\ufeff').strip('\xef\xbb\xbf') for i in line] 
-            x1, y1, x2, y2, x3, y3, x4, y4 = list(map(int, line[:8])) 
-            text_polys.append([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
-            if label == '*' or label == '###':
-                text_tags.append(True)
-            else:
-                text_tags.append(False)
-        
+        lines = f.readlines()
+    for line in lines:
+        try:
+            splitted_line = line.split(',')
+            label = splitted_line[-1]# strip BOM. \ufeff for python3,  \xef\xbb\bf for python2
+            line = [i.strip('\ufeff').strip('\xef\xbb\xbf') for i in splitted_line]
+            x1, y1, x2, y2, x3, y3, x4, y4 = list(map(int, line[:8]))
+            #print("x1,y1,x2,y2,x3,y3,x4,y4,label")
+        except:
+            splitted_line = ''.join(i for i in line).split(' ')
+            label = splitted_line[-1]# strip BOM. \ufeff for python3,  \xef\xbb\bf for python2
+            line = [i.strip('\ufeff').strip('\xef\xbb\xbf') for i in splitted_line]
+            xmin, ymin, xmax, ymax = list(map(int, line[:4]))
+            x1 = x4 = xmin
+            y1 = y2 = ymin
+            x2 = x3 = xmax
+            y3 = y4 = ymax
+            #print("xmin ymin xmax ymax label")
+        text_polys.append([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+        if label == '*' or label == '###\n':
+            text_tags.append(True)
+        else:
+            text_tags.append(False)
+
     return np.array(text_polys, dtype=np.float32), np.array(text_tags, dtype=np.bool)
     #return text_polys, text_tags
 
@@ -799,8 +813,9 @@ def image_label(txt_root,
     try:
         im_fn = image_list[index]
         txt_fn = txt_list[index]
-
+        print(im_fn)
         im = cv2.imread(im_fn)
+        #print("read image done!")
         # print im_fn
         h, w, _ = im.shape
         #txt_fn = im_fn.replace(os.path.basename(im_fn).split('.')[1], 'txt')
@@ -914,6 +929,7 @@ def image_label(txt_root,
     
     except Exception as e:
         print('Exception continue')
+        text_polys, text_tags = load_annoataion(txt_fn)
         return None, None,None,None
 
     images = im[:, :, ::-1].astype(np.float32)
