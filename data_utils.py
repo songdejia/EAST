@@ -14,7 +14,7 @@ import matplotlib.patches as Patches
 from shapely.geometry import Polygon
 from PIL import Image
 import warnings
-from geo_map_cython_lib import gen_geo_map
+#from geo_map_cython_lib import gen_geo_map
 
 
 
@@ -757,7 +757,7 @@ def generate_rbox(im_size, polys, tags):
         #print('parallel {} rectangle {}'.format(parallelogram, rectange))
         p0_rect, p1_rect, p2_rect, p3_rect = rectange
         # this is one area of many
-        """
+
         for y, x in xy_in_poly:
             point = np.array([x, y], dtype=np.float32)
             # top
@@ -770,8 +770,8 @@ def generate_rbox(im_size, polys, tags):
             geo_map[y, x, 3] = point_dist_to_line(p3_rect, p0_rect, point)
             # angle
             geo_map[y, x, 4] = rotate_angle
-        """
-        gen_geo_map.gen_geo_map(geo_map, xy_in_poly, rectange, rotate_angle)
+
+        #gen_geo_map.gen_geo_map(geo_map, xy_in_poly, rectange, rotate_angle)
 
     ###sum up
     # score_map , in shrinked poly is 1

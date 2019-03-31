@@ -10,7 +10,7 @@ from model import East
 from loss import *
 from data_utils import custom_dset, collate_fn
 import time
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 import config as cfg
 from utils.init import *
 from utils.util import *
