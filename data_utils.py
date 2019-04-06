@@ -266,98 +266,6 @@ def crop_area(im, polys, tags, crop_background=False, max_tries=5000, vis = Fals
                 continue
     return im, polys, tags
 
-
-
-"""
-def crop_area(im, polys, tags, crop_background=False, max_tries=50, vis = True, img_name = None):
-    '''
-    make random crop from the input image
-    :param im:
-    :param polys:
-    :param tags:
-    :param crop_background:
-    :param max_tries:
-    :return:
-    '''
-    print('goggogoogo')
-    h, w, _ = im.shape
-    pad_h = h//10
-    pad_w = w//10
-    h_array = np.zeros((h + pad_h*2), dtype=np.int32)
-    w_array = np.zeros((w + pad_w*2), dtype=np.int32)
-    for poly in polys:
-        poly = np.round(poly, decimals=0).astype(np.int32)
-        minx = np.min(poly[:, 0])
-        maxx = np.max(poly[:, 0])
-        w_array[minx+pad_w:maxx+pad_w] = 1
-        miny = np.min(poly[:, 1])
-        maxy = np.max(poly[:, 1])
-        h_array[miny+pad_h:maxy+pad_h] = 1
-    # ensure the cropped area not across a text
-    h_axis = np.where(h_array == 0)[0]
-    w_axis = np.where(w_array == 0)[0]
-    print('aaaaaaaaa')
-    if len(h_axis) == 0 or len(w_axis) == 0:
-        return im, polys, tags
-    
-    print('bbbbbbbbb')
-    for i in range(max_tries):
-        print('we have try {} times'.format(i))
-        xx = np.random.choice(w_axis, size=2)
-        xmin = np.min(xx) - pad_w
-        xmax = np.max(xx) - pad_w
-        xmin = np.clip(xmin, 0, w-1)
-        xmax = np.clip(xmax, 0, w-1)
-        yy = np.random.choice(h_axis, size=2)
-        ymin = np.min(yy) - pad_h
-        ymax = np.max(yy) - pad_h
-        ymin = np.clip(ymin, 0, h-1)
-        ymax = np.clip(ymax, 0, h-1)
-        # if xmax - xmin < FLAGS.min_crop_side_ratio*w or ymax - ymin < FLAGS.min_crop_side_ratio*h:
-        if xmax - xmin < 0.1*w or ymax - ymin < 0.1*h:
-            # area too small
-            continue
-        if polys.shape[0] != 0:
-            poly_axis_in_area = (polys[:, :, 0] >= xmin) & (polys[:, :, 0] <= xmax) \
-                                & (polys[:, :, 1] >= ymin) & (polys[:, :, 1] <= ymax)
-            selected_polys = np.where(np.sum(poly_axis_in_area, axis=1) == 4)[0]
-        else:
-            selected_polys = []
-        if len(selected_polys) == 0:
-            # no text in this area
-            if crop_background:
-                im = im[ymin:ymax+1, xmin:xmax+1, :]
-                polys = polys[selected_polys]
-                tags = tags[selected_polys]
-                if vis == True:
-                    path = os.path.join(os.path.abspath('./'), 'tmp/vis_for_crop', '{}-bg.jpg'.format(img_name))
-                    cv2.imwrite(path, im)
-                    print('save a bg')
-                return im, polys, tags
-            else:
-                continue
-        im = im[ymin:ymax+1, xmin:xmax+1, :]
-        polys = polys[selected_polys]
-        tags = tags[selected_polys]
-        polys[:, :, 0] -= xmin
-        polys[:, :, 1] -= ymin
-
-        print('crop front')
-        if vis == True:
-            #print('TEST for visualization about crop img')
-            for ids, poly in enumerate(polys):
-                print('img h:{} w:{} poly id:{} {}'.format(im.shape[0], im.shape[1], ids, poly))
-                x = [poly.astype(np.int32).reshape((-1, 1, 2))]
-                cv2.polylines(im[:, :, ::-1], x, True, color=(255, 255, 0), thickness=3)
-                print(x)
-            path = os.path.join(os.path.abspath('./'), 'tmp/vis_for_crop', '{}-fg.jpg'.format(img_name))
-            cv2.imwrite(path, im)
-            print('save a fg')
-        return im, polys, tags
-
-    return im, polys, tags
-"""
-
 def shrink_poly(poly, r):
     '''
     fit a poly inside the origin poly, maybe bugs here...
@@ -664,11 +572,12 @@ def generate_rbox(im_size, polys, tags):
     geo_map = np.zeros((h, w, 5), dtype=np.float32)
     # mask used during traning, to ignore some hard areas
     training_mask = np.ones((h, w), dtype=np.uint8)
+    rect = []
     for poly_idx, poly_tag in enumerate(zip(polys, tags)):
         poly = poly_tag[0]
         tag = poly_tag[1]
         poly = np.array(poly)
-        tag  = np.array(tag)
+        tag = np.array(tag)
         r = [None, None, None, None]
         for i in range(4):
             r[i] = min(np.linalg.norm(poly[i] - poly[(i + 1) % 4]),
@@ -771,7 +680,7 @@ def generate_rbox(im_size, polys, tags):
         #print('parallel {} rectangle {}'.format(parallelogram, rectange))
         p0_rect, p1_rect, p2_rect, p3_rect = rectange
         # this is one area of many
-
+        rect.append(rectange)
         for y, x in xy_in_poly:
             point = np.array([x, y], dtype=np.float32)
             # top
@@ -792,7 +701,7 @@ def generate_rbox(im_size, polys, tags):
     # geo_map, corresponding to score map
     # training map is less than geo_map
 
-    return score_map, geo_map, training_mask
+    return score_map, geo_map, training_mask, rect
 
 def image_label(txt_root, 
                 image_list, img_name,
@@ -883,18 +792,18 @@ def image_label(txt_root,
             geo_map = np.zeros((input_size, input_size, geo_map_channels), dtype=np.float32)
             training_mask = np.ones((input_size, input_size), dtype=np.uint8)
         else:
-            im, text_polys, text_tags = crop_area(im, text_polys, text_tags, crop_background=False)
-            #assert len(text_polys) > 0, 'crop area should have some text_polys'
-            if len(text_polys) == 0: #for some reason , gt contain no polys, have to return black
-                score_map = np.zeros((input_size, input_size), dtype=np.uint8)
-                geo_map_channels = 5 
-                geo_map = np.zeros((input_size, input_size, geo_map_channels), dtype=np.float32)
-                training_mask = np.ones((input_size, input_size), dtype=np.uint8)
-                images = im[:, :, ::-1].astype(np.float32)
-                score_maps = score_map[::4, ::4, np.newaxis].astype(np.float32)
-                geo_maps = geo_map[::4, ::4, :].astype(np.float32)
-                training_masks = training_mask[::4, ::4, np.newaxis].astype(np.float32)
-                return images, score_maps, geo_maps, training_masks
+            #im, text_polys, text_tags = crop_area(im, text_polys, text_tags, crop_background=False)
+            assert len(text_polys) > 0, 'crop area should have some text_polys'
+            #if len(text_polys) == 0: #for some reason , gt contain no polys, have to return black
+            #    score_map = np.zeros((input_size, input_size), dtype=np.uint8)
+            #    geo_map_channels = 5
+            #    geo_map = np.zeros((input_size, input_size, geo_map_channels), dtype=np.float32)
+            #    training_mask = np.ones((input_size, input_size), dtype=np.uint8)
+            #    images = im[:, :, ::-1].astype(np.float32)
+            #    score_maps = score_map[::4, ::4, np.newaxis].astype(np.float32)
+            #    geo_maps = geo_map[::4, ::4, :].astype(np.float32)
+            #    training_masks = training_mask[::4, ::4, np.newaxis].astype(np.float32)
+            #    return images, score_maps, geo_maps, training_masks,
             #if text_polys.shape[0] == 0:
             #    print('cannot find frontground')
             #    return None, None, None, None
@@ -924,7 +833,7 @@ def image_label(txt_root,
             #ext_polys[:, :, 1] *= resize_ratio_3_y
             new_h, new_w, _ = im.shape
             #print('done3')
-            score_map, geo_map, training_mask = generate_rbox((new_h, new_w), text_polys, text_tags)
+            score_map, geo_map, training_mask, rect = generate_rbox((new_h, new_w), text_polys, text_tags)
             #print('done4')
     
     except Exception as e:
@@ -937,7 +846,7 @@ def image_label(txt_root,
     geo_maps = geo_map[::4, ::4, :].astype(np.float32)
     training_masks = training_mask[::4, ::4, np.newaxis].astype(np.float32)
 
-    return images, score_maps, geo_maps, training_masks
+    return images, score_maps, geo_maps, training_masks, rect
 
  
 def transform_for_train(img):
@@ -968,7 +877,7 @@ def transform_for_train(img):
 class custom_dset(data.Dataset):
     def __init__(self, img_root, txt_root, vis = False):
         
-        self.img_path_list, self.img_name_list = get_images(img_root)
+        self.img_path_list, self.img_name_list = get_images(img_root) #sorted list
         
         self.txt_root = txt_root
         
@@ -1004,7 +913,7 @@ class custom_dset(data.Dataset):
         #transform = transform_for_train()
         status = True
         while status:
-            img, score_map, geo_map, training_mask = image_label(self.txt_root,
+            img, score_map, geo_map, training_mask, rect = image_label(self.txt_root,
             
                 self.img_path_list, self.img_name_list,
             
@@ -1012,7 +921,7 @@ class custom_dset(data.Dataset):
             
                 index, input_size = 512,
             
-                random_scale = np.array([0.5, 1.0, 2.0, 3.0]), background_ratio = 3./8)
+                random_scale = np.array([0.5, 1.0, 2.0, 3.0]), background_ratio = 0.0)
         
             if not img is None:#512,512,3 ndarray should transform to 3,512,512
 
@@ -1023,8 +932,8 @@ class custom_dset(data.Dataset):
                 img = img.transpose(2, 0, 1)
                 #print(img.shape)
                 #print(type(img))
-
-                return img, score_map, geo_map, training_mask
+                rect = np.array(rect)
+                return img, score_map, geo_map, training_mask, rect
 
             else:
 
@@ -1045,12 +954,13 @@ class custom_dset(data.Dataset):
         return len(self.img_path_list)
 
 def collate_fn(batch):
-    img, score_map, geo_map, training_mask = zip(*batch)#tuple
+    img, score_map, geo_map, training_mask, rect = zip(*batch)#tuple
     bs = len(score_map)
     images = []
     score_maps = []
     geo_maps = []
     training_masks = []
+    rectagles = []
     for i in range(bs):
         if img[i] is not None:
             a = torch.from_numpy(img[i])
@@ -1068,13 +978,17 @@ def collate_fn(batch):
             d = torch.from_numpy(training_mask[i])
             d = d.permute(2, 0, 1)
             training_masks.append(d)
+
+            f = torch.from_numpy(rect[i])
+            rectagles.append(f)
     
     images = torch.stack(images, 0)
     score_maps = torch.stack(score_maps, 0)
     geo_maps = torch.stack(geo_maps, 0)
     training_masks = torch.stack(training_masks, 0)
+    rectagles = torch.stack(rectagles, 0)
 
-    return images, score_maps, geo_maps, training_masks
+    return images, score_maps, geo_maps, training_masks, rectagles
 ## img = bs * 512 * 512 *3
 ## score_map = bs* 128 * 128 * 1
 ## geo_map = bs * 128 * 128 * 5

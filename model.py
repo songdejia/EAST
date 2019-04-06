@@ -163,8 +163,11 @@ def resnet50(pretrained=True, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        
-        model.load_state_dict(torch.load("./resnet50-19c8e357.pth"))
+        try:
+            model.load_state_dict(torch.load("./resnet50-19c8e357.pth"))
+            print("load pretrained model from:", "./resnet50-19c8e357.pth")
+        except Exception as e:
+            raise e
         #model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
     return model
 
@@ -189,9 +192,9 @@ class East(nn.Module):
     def __init__(self):
         super(East, self).__init__()
         self.resnet = resnet50(True)
-        self.conv1 = nn.Conv2d(3072, 128, 1)
-        self.bn1 = nn.BatchNorm2d(128)
-        self.relu1 = nn.ReLU()
+        self.conv1 = nn.Conv2d(3072, 128, 1) #input channels, output channels, kernel size
+        self.bn1 = nn.BatchNorm2d(128) #expected input channels
+        self.relu1 = nn.ReLU() #relu()
 
         self.conv2 = nn.Conv2d(128, 128, 3, padding=1)
         self.bn2 = nn.BatchNorm2d(128)
@@ -258,7 +261,8 @@ class East(nn.Module):
         g = self.conv7(h) # bs 32 w/4 h/4
         g = self.bn7(g)
         g = self.relu7(g)
-        
+        #################################################################shared_conv result
+        shared_feature = g
         F_score = self.conv8(g) #  bs 1 w/4 h/4
         F_score = self.sigmoid1(F_score)
         geo_map = self.conv9(g)
@@ -268,4 +272,4 @@ class East(nn.Module):
         angle_map = (angle_map - 0.5) * math.pi / 2
 
         F_geometry = torch.cat((geo_map, angle_map), 1) # bs 5 w/4 w/4
-        return F_score, F_geometry
+        return F_score, F_geometry, shared_feature

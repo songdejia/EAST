@@ -23,7 +23,7 @@ import zipfile
 import glob
 import warnings
 import numpy as np
-
+from roirotate import rotate as cropped_feature
 
 
 def train(train_loader, model, criterion, scheduler, optimizer, epoch):
@@ -34,16 +34,18 @@ def train(train_loader, model, criterion, scheduler, optimizer, epoch):
     end = time.time()
     model.train()
     
-    for i, (img, score_map, geo_map, training_mask) in enumerate(train_loader):
+    for i, (img, score_map, geo_map, training_mask, rectangle) in enumerate(train_loader):
         data_time.update(time.time() - end)
+
 
         if cfg.gpu is not None:
             img, score_map, geo_map, training_mask = img.cuda(), score_map.cuda(), geo_map.cuda(), training_mask.cuda()
 
-        f_score, f_geometry = model(img)
+        f_score, f_geometry, shared_feature = model(img)
         loss1 = criterion(score_map, f_score, geo_map, f_geometry, training_mask)
         losses.update(loss1.item(), img.size(0))
-
+        ###################################################################################roirotate
+        feature_rec = cropped_feature(img, rectangle, shared_feature)   #all box in image
         # backward
         scheduler.step()
         optimizer.zero_grad()
@@ -95,7 +97,7 @@ def main():
     
     criterion = LossFunc()
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=10000, gamma=0.94)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10000, gamma=0.94)  #来自vipermdl##和论文中的不同##gamma(float 类型):学习率下降的乘数因子
     
     # init or resume
     if cfg.resume and  os.path.isfile(cfg.checkpoint):
@@ -139,5 +141,5 @@ def main():
 
 
 if __name__ == "__main__":
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,3'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     main()
